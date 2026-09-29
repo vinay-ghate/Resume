@@ -1,12 +1,19 @@
-name: Compile LaTeX to PDF
+name: Compile LaTeX to Raw PDF
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
+# Grant permissions required to deploy to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build_latex:
@@ -16,56 +23,61 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      # Step 2: Detect the latest file, its folder, and apply your exact naming format
+      # Step 2: Read the hardcoded prefix variable directly from the workflow configuration
+      - name: Setup Custom Variables
+        run: |
+          # Change this text to change the name prefix
+          echo "AUTHOR_PREFIX=Vinay-Ghate" >> $GITHUB_ENV
+
+      # Step 3: Detect the latest file, its folder, and apply your exact naming format
       - name: Detect latest modified .tex file and format name
         id: detect_file
         run: |
-          # 1. Find the latest modified .tex file
           LATEST_TEX=$(find . -name "*.tex" -type f -printf '%T@ %p\n' | sort -rn | head -n 1 | awk '{print $2}')
           LATEST_TEX=${LATEST_TEX#./}
-          
-          # 2. Extract the file name without the extension (.tex)
           FILE_NAME=$(basename "$LATEST_TEX" .tex)
           
-          # 3. Extract the parent folder name. If it's in the root directory, default to "root"
           FOLDER_NAME=$(basename "$(dirname "$LATEST_TEX")")
           if [ "$FOLDER_NAME" = "." ] || [ "$FOLDER_NAME" = "" ]; then
             FOLDER_NAME="root"
           fi
           
-          # 4. Create your custom naming format
-          CUSTOM_NAME="Vinay-Ghate-${FOLDER_NAME}-${FILE_NAME}.pdf"
+          # Combine your hardcoded variable into the format
+          CUSTOM_NAME="${{ env.AUTHOR_PREFIX }}-${FOLDER_NAME}-${FILE_NAME}.pdf"
           
-          echo "Detected File: $LATEST_TEX"
-          echo "Generated PDF Name: $CUSTOM_NAME"
-          
-          # Save variables to GitHub Environment for subsequent steps
           echo "TEX_FILE=$LATEST_TEX" >> $GITHUB_ENV
           echo "ORIGINAL_BASE=$FILE_NAME" >> $GITHUB_ENV
           echo "CUSTOM_PDF_NAME=$CUSTOM_NAME" >> $GITHUB_ENV
 
-      # Step 3: Compile the LaTeX document
+      # Step 4: Compile the LaTeX document
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v4
         with:
           root_file: ${{ env.TEX_FILE }}
 
-      # Step 4: Rename the output PDF to your custom format
-      - name: Rename PDF to custom format
+      # Step 5: Prepare staging folder for deployment
+      - name: Rename and Move PDF to staging folder
         run: |
-          mv "${{ env.ORIGINAL_BASE }}.pdf" "${{ env.CUSTOM_PDF_NAME }}"
+          mkdir public
+          mv "${{ env.ORIGINAL_BASE }}.pdf" "public/${{ env.CUSTOM_PDF_NAME }}"
 
-      # Step 5: Upload the custom-named PDF artifact
-      - name: Upload PDF artifact
-        id: artifact-upload
-        uses: actions/upload-artifact@v4
+      # Step 6: Setup and upload staging folder to GitHub Pages
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: ${{ env.CUSTOM_PDF_NAME }}
-          path: ${{ env.CUSTOM_PDF_NAME }}
+          path: './public'
 
-      # Step 6: Display the direct link in the workflow summary
+      # Step 7: Deploy the raw PDF to the web
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # Step 8: Print the direct link to the raw PDF file
       - name: Generate Direct Download Link
         run: |
-          echo "### 📄 PDF Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "You can download your formatted PDF directly using this link:" >> $GITHUB_STEP_SUMMARY
-          echo "[Download ${{ env.CUSTOM_PDF_NAME }}](${{ steps.artifact-upload.outputs.artifact-url }})" >> $GITHUB_STEP_SUMMARY
+          # Cleans the URL trailing slash if present
+          BASE_URL=$(echo "${{ steps.deployment.outputs.page_url }}" | sed 's/\/$//')
+          
+          echo "### 📄 Raw PDF Build Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "You can view or download the raw PDF directly here:" >> $GITHUB_STEP_SUMMARY
+          echo "👉 **[$| ${{ env.CUSTOM_PDF_NAME }}]($BASE_URL/${{ env.CUSTOM_PDF_NAME }})**" >> $GITHUB_STEP_SUMMARY
