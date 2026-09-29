@@ -1,4 +1,4 @@
-name: Compile LaTeX to Permanent Archive
+name: Compile All LaTeX Files to Archive
 
 on:
   push:
@@ -6,53 +6,63 @@ on:
       - main
 
 jobs:
-  build_latex:
+  build_all_latex:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to upload and update release assets
+      contents: write
     steps:
       # Step 1: Check out the repository
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      # Step 2: Set your hardcoded name variable
+      # Step 2: Set your hardcoded name prefix variable
       - name: Setup Custom Variables
         run: |
-          echo "AUTHOR_PREFIX=Vinay-Ghate" >> $GITHUB_ENV
+          echo "AUTHOR_PREFIX=Vinay-Ghate" >> \$GITHUB_ENV
 
-      # Step 3: Detect the latest file, its folder, and apply your exact naming format
-      - name: Detect latest modified .tex file and format name
-        id: detect_file
+      # Step 3: Run a loop to detect, compile, and rename EVERY .tex file
+      - name: Process and Compile All .tex Files
+        id: compile_step
         run: |
-          LATEST_TEX=$(find . -name "*.tex" -type f -printf '%T@ %p\n' | sort -rn | head -n 1 | awk '{print $2}')
-          LATEST_TEX=${LATEST_TEX#./}
-          FILE_NAME=$(basename "$LATEST_TEX" .tex)
+          # Create a temporary output directory to hold all generated PDFs
+          mkdir -p final_pdfs
           
-          FOLDER_NAME=$(basename "$(dirname "$LATEST_TEX")")
-          if [ "$FOLDER_NAME" = "." ] || [ "$FOLDER_NAME" = "" ]; then
-            FOLDER_NAME="root"
-          fi
-          
-          # Add a tiny unique timestamp or run number so files never overwrite each other
-          CUSTOM_NAME="${{ env.AUTHOR_PREFIX }}-${FOLDER_NAME}-${FILE_NAME}-build${{ github.run_number }}.pdf"
-          
-          echo "TEX_FILE=$LATEST_TEX" >> $GITHUB_ENV
-          echo "ORIGINAL_BASE=$FILE_NAME" >> $GITHUB_ENV
-          echo "CUSTOM_PDF_NAME=$CUSTOM_NAME" >> $GITHUB_ENV
+          # Find all .tex files across the repository
+          find . -name "*.tex" -type f | while read -r LATEST_TEX; do
+            # Strip leading './'
+            LATEST_TEX=\${LATEST_TEX#./}
+            
+            # Extract basic file name without extension
+            FILE_NAME=(basename "LATEST_TEX" .tex)
+            
+            # Extract parent folder name
+            FOLDER_NAME=\$(basename "(dirname "LATEST_TEX")")
+            if [ "\$FOLDER_NAME" = "." ] || [ "\(FOLDER_NAME" = "" ] \vert{}\vert{} [ "\)FOLDER_NAME" = "/" ]; then
+              FOLDER_NAME="root"
+            fi
+            
+            # Format the custom PDF filename
+            CUSTOM_NAME="\({{ env.AUTHOR_PREFIX }}-\){FOLDER_NAME}-\({FILE_NAME}-build\){{ github.run_number }}.pdf"
+            
+            echo "----------------------------------------------------"
+            echo "Compiling file: \$LATEST_TEX"
+            echo "Target output: \$CUSTOM_NAME"
+            echo "----------------------------------------------------"
+            
+            # Run the LaTeX compilation tool directly inside the loop container
+            # (Using docker run keeps the loop safe and isolated for each file)
+            docker run --rm -v "\$(pwd):/workdir" xucheng/texlive latexmk -pdf -halt-on-error "/workdir/\$LATEST_TEX"
+            
+            # If compilation succeeded, rename and move the PDF to our staging folder
+            if [ -f "\${FILE_NAME}.pdf" ]; then
+              mv "\({FILE_NAME}.pdf" "final_pdfs/\){CUSTOM_NAME}"
+            else
+              echo "Warning: \${FILE_NAME}.pdf was not generated."
+            fi
+          done
 
-      # Step 4: Compile the LaTeX document
-      - name: Compile LaTeX document
-        uses: xu-cheng/latex-action@v4
-        with:
-          root_file: ${{ env.TEX_FILE }}
-
-      # Step 5: Rename the output PDF to your custom format
-      - name: Rename PDF to custom format
-        run: |
-          mv "${{ env.ORIGINAL_BASE }}.pdf" "${{ env.CUSTOM_PDF_NAME }}"
-
-      # Step 6: Push the raw PDF to the permanent Archive Release
-      - name: Upload to Permanent Release Archive
+      # Step 4: Push all raw PDFs to the permanent Archive Release at once
+      - name: Upload All to Permanent Release Archive
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pdf-archive
@@ -60,13 +70,13 @@ jobs:
           body: "This release contains all historical raw PDF builds compiled by GitHub Actions."
           draft: false
           prerelease: false
-          files: ${{ env.CUSTOM_PDF_NAME }}
+          files: final_pdfs/*.pdf
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
-      # Step 7: Print the download dashboard link
+      # Step 5: Print the download dashboard link
       - name: Generate Direct Download Link
         run: |
-          echo "### 📄 PDF Uploaded to Archive!" >> $GITHUB_STEP_SUMMARY
-          echo "Your raw PDF has been successfully added to the central archive." >> $GITHUB_STEP_SUMMARY
-          echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com{{ github.repository }}/releases/tag/pdf-archive)**" >> $GITHUB_STEP_SUMMARY
+          echo "### 📄 All PDFs Uploaded to Archive!" >> \$GITHUB_STEP_SUMMARY
+          echo "Every `.tex` file in your repository has been compiled and saved." >> \$GITHUB_STEP_SUMMARY
+          echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com{{ github.repository }}/releases/tag/pdf-archive)**" >> \$GITHUB_STEP_SUMMARY
