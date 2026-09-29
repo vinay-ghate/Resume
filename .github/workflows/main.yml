@@ -20,48 +20,40 @@ jobs:
         run: |
           echo "AUTHOR_PREFIX=Vinay-Ghate" >> \$GITHUB_ENV
 
-      # Step 3: Run a loop to detect, compile, and rename EVERY .tex file
-      - name: Process and Compile All .tex Files
+      # Step 3: Find and Compile EVERY .tex file using the marketplace action
+      - name: Compile All LaTeX files
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: |
+            **/*.tex
+
+      # Step 4: Organize and rename PDFs using clean, safe Bash syntax
+      - name: Rename and Move PDFs
         run: |
-          # Create a temporary output directory to hold all generated PDFs
           mkdir -p final_pdfs
           
-          # Find all .tex files across the repository and loop through them
-          find . -name "*.tex" -type f | while read -r LATEST_TEX; do
-            # Strip leading './'
-            LATEST_TEX="\${LATEST_TEX#./}"
+          # Find all compiled PDFs in the workspace
+          find . -name "*.pdf" -not -path "./final_pdfs/*" -type f | while read -r pdf_path; do
+            # Extract basic file name without path and extension
+            file_base=\((basename "\)pdf_path" .pdf)
             
-            # Extract basic file name without extension
-            FILE_NAME=(basename "LATEST_TEX" .tex)
+            # Extract parent directory name
+            dir_path=\((dirname "\)pdf_path")
+            folder_name=\((basename "\)dir_path")
             
-            # Extract parent folder name
-            DIR_NAME=(dirname "LATEST_TEX")
-            FOLDER_NAME=(basename "DIR_NAME")
-            
-            if [ "\$FOLDER_NAME" = "." ] || [ "\(FOLDER_NAME" = "" ] \vert{}\vert{} [ "\)FOLDER_NAME" = "/" ]; then
-              FOLDER_NAME="root"
+            # Fallback if the file is in the root directory
+            if [ "\(folder_name" = "." ] \vert{}\vert{} [ "\)folder_name" = "" ]; then
+              folder_name="root"
             fi
             
-            # Format the custom PDF filename
-            CUSTOM_NAME="\({{ env.AUTHOR_PREFIX }}-\){FOLDER_NAME}-\({FILE_NAME}-build\){{ github.run_number }}.pdf"
+            # Form your exact requested custom name format
+            custom_name="\({{ env.AUTHOR_PREFIX }}-\){folder_name}-\({file_base}-build\){{ github.run_number }}.pdf"
             
-            echo "----------------------------------------------------"
-            echo "Compiling file: \$LATEST_TEX"
-            echo "Target output: \$CUSTOM_NAME"
-            echo "----------------------------------------------------"
-            
-            # Run the LaTeX compilation tool directly inside the container
-            docker run --rm -v "\$(pwd):/workdir" xucheng/texlive latexmk -pdf -halt-on-error "/workdir/\$LATEST_TEX"
-            
-            # If compilation succeeded, rename and move the PDF to our staging folder
-            if [ -f "\${FILE_NAME}.pdf" ]; then
-              mv "\({FILE_NAME}.pdf" "final_pdfs/\){CUSTOM_NAME}"
-            else
-              echo "Warning: \${FILE_NAME}.pdf was not generated."
-            fi
+            echo "Moving \$pdf_path to final_pdfs/\$custom_name"
+            mv "\(pdf_path" "final_pdfs/\)custom_name"
           done
 
-      # Step 4: Push all raw PDFs to the permanent Archive Release at once
+      # Step 5: Push all raw PDFs to the permanent Archive Release
       - name: Upload All to Permanent Release Archive
         uses: softprops/action-gh-release@v2
         with:
@@ -74,7 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
-      # Step 5: Print the download dashboard link
+      # Step 6: Print the download dashboard link
       - name: Generate Direct Download Link
         run: |
           echo "### 📄 All PDFs Uploaded to Archive!" >> \$GITHUB_STEP_SUMMARY
