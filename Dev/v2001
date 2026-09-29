@@ -1,0 +1,184 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[margin=0.4in]{geometry}
+
+%----------FONT OPTIONS----------
+\usepackage[default]{sourcesanspro}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{} 
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-8pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-1pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in]} 
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-3pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%----------HEADER-----------------
+\begin{center}
+    \textbf{\Huge \scshape Vinay Ghate} \\ \vspace{4pt}
+    \small \href{mailto:ghatevinay2@gmail.com}{\underline{ghatevinay2@gmail.com}} $|$ 
+    \href{https://linkedin.com/in/vinay-ghate}{\underline{linkedin.com/in/vinay-ghate}} $|$ 
+    \href{https://v1nay.is-a.dev}{\underline{v1nay.is-a.dev}} $|$ 
+    +91-8605078054 $|$ 
+    Pune, India
+\end{center}
+
+%-----------SUMMARY-----------------
+\section{Summary}
+\small{Python Backend Engineer and System Engineer, dedicated to building practical solutions and robust backend systems. Experienced in Python, SQL scripting, cloud technologies, and AI-based systems. Passionate about building system architecture, optimizing SDLC, leveraging generative AI, and turning complex requirements into efficient, real-world IT solutions.
+}
+
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Zeal College of Engineering, Pune University}{Pune, India}
+      {B.E. in Computer Engineering + Honors in Cyber Security (CGPA: 8.41)}{2024}
+      \vspace{1pt}
+      \small{\item{
+       \textbf{Coursework}{: Database Management Systems, Operating Systems, Software Engineering, Cyber Security}
+      }}
+  \resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------------
+%-----------EXPERIENCE-----------------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Tata Consultancy Services}{Nov 2024 -- Present}
+      {System Engineer C1}{Pune, India}
+      \resumeItemListStart
+        \resumeItem{Systems Automation \& Backend}
+          {Developing and maintaining system-level workflows and backend logic on Linux environments, focusing on event-driven processing and system responsiveness.}
+        \resumeItem{Data \& Streaming Workflows}
+          {Managing continuous data pipelines using Apache Kafka, implementing near real-time processing and optimizing database interactions.}
+        \resumeItem{Network \& Secure Communication}
+          {Configuring and troubleshooting secure inter-service communication protocols (mTLS, TCP/IP) and deploying containerized services on Kubernetes.}
+        % \resumeItem{Debugging \& Issue Resolution}
+        %   {Identifying and resolving application-level issues by analyzing system logs, network behavior, and runtime stack traces.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Scrobits Technologies}{Jun 2024 -- Nov 2024}
+      {Python Backend Engineering Intern}{Mumbai, India}
+      \resumeItemListStart
+        \resumeItem{Python Automation Workflows}
+          {Designed and implemented Python-based automation scripts to streamline repetitive data processing tasks and optimize business workflows.}
+        \resumeItem{REST API \& Database Integration}
+          {Built and integrated RESTful APIs with frontend interfaces, utilizing SQL queries to handle data extraction and processing for client-facing systems.}
+        \resumeItem{Proof of Concepts (POCs)}
+          {Developed technical POCs focused on workflow automation, demonstrating modular design, reusability, and maintainable code practices.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+  
+
+%-----------PROJECTS-----------------
+%-----------PROJECTS-----------------
+\section{Projects}
+  \resumeSubHeadingListStart
+
+    \resumeProjectHeading
+      {\textbf{TalkWithDB -- Natural Language SQL Engine} $|$ \emph{Python, Streamlit, SQL, LLMs}}{2025}
+      \resumeItemListStart
+        \item\small{Developed a Streamlit application enabling users to query SQL DB using natural language inputs powered by LLMs.}
+        \item\small{Implemented backend logic leveraging generative AI to translate user prompts into complex SQL scripts, automating the data extraction process.}
+        \item\small{Ensured robust database connectivity and optimized LLM-assisted query execution for rapid data retrieval and analysis.}
+      \resumeItemListEnd
+
+    \resumeProjectHeading
+      {\textbf{Chikistalaya -- Management Platform} $|$ \emph{Python, TypeScript, SQL, Docker, Generative AI}}{2025}
+      \resumeItemListStart
+        \item\small{Built backend services and automation APIs integrating gen-AI workflows for user data processing and system automation.}
+        \item\small{Integrated an LLM-based assistant, ensuring strict data isolation, access control, data governance processes and secure handling of information.}
+      %   \item\small{Containerized the architecture using Docker, ensuring scalable and reliable deployment of AI-powered backend platforms.}
+      % \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------SKILLS-----------------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages \& Scripting}{: Python, SQL Scripting, Java, Bash, CSS} \\
+     % \textbf{Networking \& Protocols}{: TCP/IP, mTLS, WebRTC, Microservices Communication} \\
+     \textbf{Backend \& Automation}{: Apache Kafka, Flask, FastAPI, REST APIs, Automation Workflows} \\
+     \textbf{Cloud \& Infrastructure}{: Kubernetes, Docker, Linux, YAML} \\
+     \textbf{Databases \& Tools}{: PostgreSQL, MySQL, Oracle DB (Fundamentals), Git, Hadoop} \\
+     \textbf{AI \& Generative Systems}{: LLMs, Prompt Engineering, RAG Pipelines, Agentic AI, MCPs}
+    }}
+ \end{itemize}
+%-----------CERTIFICATIONS-----------------
+\section{Certifications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbullet{ Microsoft Certified: Azure AI Fundamentals} \\
+     \textbullet{ Data Streaming Engineer -- Confluent} \\
+     \textbullet{ OCI Certified AI Foundations Associate} \\
+     \textbullet{ OCI Certified Foundations Associate}
+    }}
+ \end{itemize}
+
+%-----------ACTIVITIES-----------------
+\section{Activities \& Achievements}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbullet{ Co-founded and managed student communities -  IODump and GDSC ZCOER.} \\
+     \textbullet{ Selected for Amazon ML Summer School. }
+    }}
+ \end{itemize}
+
+\end{document}
