@@ -22,7 +22,6 @@ jobs:
 
       # Step 3: Run a loop to detect, compile, and rename EVERY .tex file
       - name: Process and Compile All .tex Files
-        id: compile_step
         run: |
           # Create a temporary output directory to hold all generated PDFs
           mkdir -p final_pdfs
@@ -49,8 +48,7 @@ jobs:
             echo "Target output: \$CUSTOM_NAME"
             echo "----------------------------------------------------"
             
-            # Run the LaTeX compilation tool directly inside the loop container
-            # (Using docker run keeps the loop safe and isolated for each file)
+            # Run the LaTeX compilation tool directly inside the container
             docker run --rm -v "\$(pwd):/workdir" xucheng/texlive latexmk -pdf -halt-on-error "/workdir/\$LATEST_TEX"
             
             # If compilation succeeded, rename and move the PDF to our staging folder
@@ -78,5 +76,5 @@ jobs:
       - name: Generate Direct Download Link
         run: |
           echo "### 📄 All PDFs Uploaded to Archive!" >> \$GITHUB_STEP_SUMMARY
-          echo "Every `.tex` file in your repository has been compiled and saved." >> \$GITHUB_STEP_SUMMARY
+          echo "Every \`.tex\` file in your repository has been compiled and saved." >> \$GITHUB_STEP_SUMMARY
           echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com{{ github.repository }}/releases/tag/pdf-archive)**" >> \$GITHUB_STEP_SUMMARY
