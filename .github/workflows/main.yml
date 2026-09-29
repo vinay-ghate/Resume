@@ -1,32 +1,23 @@
-name: Compile LaTeX to Raw PDF
+name: Compile LaTeX to Permanent Archive
 
 on:
   push:
     branches:
       - main
 
-# Grant permissions required to deploy to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build_latex:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to upload and update release assets
     steps:
       # Step 1: Check out the repository
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      # Step 2: Read the hardcoded prefix variable directly from the workflow configuration
+      # Step 2: Set your hardcoded name variable
       - name: Setup Custom Variables
         run: |
-          # Change this text to change the name prefix
           echo "AUTHOR_PREFIX=Vinay-Ghate" >> $GITHUB_ENV
 
       # Step 3: Detect the latest file, its folder, and apply your exact naming format
@@ -42,8 +33,8 @@ jobs:
             FOLDER_NAME="root"
           fi
           
-          # Combine your hardcoded variable into the format
-          CUSTOM_NAME="${{ env.AUTHOR_PREFIX }}-${FOLDER_NAME}-${FILE_NAME}.pdf"
+          # Add a tiny unique timestamp or run number so files never overwrite each other
+          CUSTOM_NAME="${{ env.AUTHOR_PREFIX }}-${FOLDER_NAME}-${FILE_NAME}-build${{ github.run_number }}.pdf"
           
           echo "TEX_FILE=$LATEST_TEX" >> $GITHUB_ENV
           echo "ORIGINAL_BASE=$FILE_NAME" >> $GITHUB_ENV
@@ -55,29 +46,27 @@ jobs:
         with:
           root_file: ${{ env.TEX_FILE }}
 
-      # Step 5: Prepare staging folder for deployment
-      - name: Rename and Move PDF to staging folder
+      # Step 5: Rename the output PDF to your custom format
+      - name: Rename PDF to custom format
         run: |
-          mkdir public
-          mv "${{ env.ORIGINAL_BASE }}.pdf" "public/${{ env.CUSTOM_PDF_NAME }}"
+          mv "${{ env.ORIGINAL_BASE }}.pdf" "${{ env.CUSTOM_PDF_NAME }}"
 
-      # Step 6: Setup and upload staging folder to GitHub Pages
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      # Step 6: Push the raw PDF to the permanent Archive Release
+      - name: Upload to Permanent Release Archive
+        uses: softprops/action-gh-release@v2
         with:
-          path: './public'
+          tag_name: pdf-archive
+          name: "LaTeX PDF Build Archive"
+          body: "This release contains all historical raw PDF builds compiled by GitHub Actions."
+          draft: false
+          prerelease: false
+          files: ${{ env.CUSTOM_PDF_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 7: Deploy the raw PDF to the web
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      # Step 8: Print the direct link to the raw PDF file
+      # Step 7: Print the download dashboard link
       - name: Generate Direct Download Link
         run: |
-          # Cleans the URL trailing slash if present
-          BASE_URL=$(echo "${{ steps.deployment.outputs.page_url }}" | sed 's/\/$//')
-          
-          echo "### 📄 Raw PDF Build Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "You can view or download the raw PDF directly here:" >> $GITHUB_STEP_SUMMARY
-          echo "👉 **[$| ${{ env.CUSTOM_PDF_NAME }}]($BASE_URL/${{ env.CUSTOM_PDF_NAME }})**" >> $GITHUB_STEP_SUMMARY
+          echo "### 📄 PDF Uploaded to Archive!" >> $GITHUB_STEP_SUMMARY
+          echo "Your raw PDF has been successfully added to the central archive." >> $GITHUB_STEP_SUMMARY
+          echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com{{ github.repository }}/releases/tag/pdf-archive)**" >> $GITHUB_STEP_SUMMARY
