@@ -1,0 +1,49 @@
+name: Compile Latest LaTeX to PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Check out the repository files
+      - name: Set up Git repository
+        uses: actions/checkout@v4
+
+      # Step 2: Find the most recently modified .tex file
+      - name: Detect latest modified .tex file
+        id: detect_file
+        run: |
+          # Find all .tex files, sort by modification time (newest first), and grab the top one
+          LATEST_TEX=$(find . -name "*.tex" -type f -printf '%T@ %p\n' | sort -rn | head -n 1 | awk '{print $2}')
+          
+          # Stripping the leading './' if present
+          LATEST_TEX=${LATEST_TEX#./}
+          
+          # Extract the base name without the extension for the output PDF mapping
+          BASE_NAME=$(basename "$LATEST_TEX" .tex)
+          
+          echo "Found latest file: $LATEST_TEX"
+          
+          # Save variables to GitHub Environment for subsequent steps
+          echo "TEX_FILE=$LATEST_TEX" >> $GITHUB_ENV
+          echo "PDF_FILE=$BASE_NAME.pdf" >> $GITHUB_ENV
+
+      # Step 3: Compile the dynamically detected LaTeX document
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: ${{ env.TEX_FILE }}
+
+      # Step 4: Upload the dynamically named PDF artifact
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-pdf
+          path: ${{ env.PDF_FILE }}
