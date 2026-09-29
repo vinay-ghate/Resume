@@ -33,31 +33,28 @@ jobs:
           import glob
           import shutil
 
-          # Create the final directory
           output_dir = "final_pdfs"
           os.makedirs(output_dir, exist_ok=True)
 
-          # Find all compiled PDF files in the repository
           pdf_files = glob.glob("**/*.pdf", recursive=True)
 
           for pdf_path in pdf_files:
-              # Skip files that are already inside the final folder
               if pdf_path.startswith(output_dir):
                   continue
 
-              # Extract folder name and file name
               dir_name = os.path.dirname(pdf_path)
               file_base = os.path.splitext(os.path.basename(pdf_path))[0]
 
-              # Determine the folder field (default to 'root' if in main folder)
-              folder_name = os.path.basename(dir_name) if dir_name and dir_name != "." else "root"
-
-              # Format your exact custom naming scheme
               author = os.environ["AUTHOR_PREFIX"]
-              run_num = os.environ["RUN_NUMBER"]
-              custom_name = f"{author}-{folder_name}-{file_base}-build{run_num}.pdf"
+              run_num = int(os.environ["RUN_NUMBER"])
 
-              # Move and rename the file
+              # If in a subfolder, include folder name. If in base directory, omit it.
+              if dir_name and dir_name != ".":
+                  folder_name = os.path.basename(dir_name)
+                  custom_name = f"{author}-{folder_name}-{file_base}-v{run_num:02d}.pdf"
+              else:
+                  custom_name = f"{author}-{file_base}-v{run_num:02d}.pdf"
+
               target_path = os.path.join(output_dir, custom_name)
               print(f"Moving {pdf_path} -> {target_path}")
               shutil.move(pdf_path, target_path)
