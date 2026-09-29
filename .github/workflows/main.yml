@@ -15,45 +15,54 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v4
 
-      # Step 2: Set your hardcoded name prefix variable
-      - name: Setup Custom Variables
-        run: |
-          echo "AUTHOR_PREFIX=Vinay-Ghate" >> \$GITHUB_ENV
-
-      # Step 3: Find and Compile EVERY .tex file using the marketplace action
+      # Step 2: Compile EVERY .tex file using the marketplace action
       - name: Compile All LaTeX files
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: |
-            **/*.tex
+          root_file: "**/*.tex"
+          glob_root_file: true
 
-      # Step 4: Organize and rename PDFs using clean, safe Bash syntax
+      # Step 3: Organize and rename PDFs using a robust Python script
       - name: Rename and Move PDFs
+        env:
+          AUTHOR_PREFIX: "Vinay-Ghate"
+          RUN_NUMBER: ${{ github.run_number }}
+        shell: python
         run: |
-          mkdir -p final_pdfs
-          
-          # Find all compiled PDFs in the workspace
-          find . -name "*.pdf" -not -path "./final_pdfs/*" -type f | while read -r pdf_path; do
-            # Extract basic file name without path and extension
-            file_base=\((basename "\)pdf_path" .pdf)
-            
-            # Extract parent directory name
-            dir_path=\((dirname "\)pdf_path")
-            folder_name=\((basename "\)dir_path")
-            
-            # Fallback if the file is in the root directory
-            if [ "\(folder_name" = "." ] \vert{}\vert{} [ "\)folder_name" = "" ]; then
-              folder_name="root"
-            fi
-            
-            # Form your exact requested custom name format
-            custom_name="\({{ env.AUTHOR_PREFIX }}-\){folder_name}-\({file_base}-build\){{ github.run_number }}.pdf"
-            
-            echo "Moving \$pdf_path to final_pdfs/\$custom_name"
-            mv "\(pdf_path" "final_pdfs/\)custom_name"
-          done
+          import os
+          import glob
+          import shutil
 
-      # Step 5: Push all raw PDFs to the permanent Archive Release
+          # Create the final directory
+          output_dir = "final_pdfs"
+          os.makedirs(output_dir, exist_ok=True)
+
+          # Find all compiled PDF files in the repository
+          pdf_files = glob.glob("**/*.pdf", recursive=True)
+
+          for pdf_path in pdf_files:
+              # Skip files that are already inside the final folder
+              if pdf_path.startswith(output_dir):
+                  continue
+
+              # Extract folder name and file name
+              dir_name = os.path.dirname(pdf_path)
+              file_base = os.path.splitext(os.path.basename(pdf_path))[0]
+
+              # Determine the folder field (default to 'root' if in main folder)
+              folder_name = os.path.basename(dir_name) if dir_name and dir_name != "." else "root"
+
+              # Format your exact custom naming scheme
+              author = os.environ["AUTHOR_PREFIX"]
+              run_num = os.environ["RUN_NUMBER"]
+              custom_name = f"{author}-{folder_name}-{file_base}-build{run_num}.pdf"
+
+              # Move and rename the file
+              target_path = os.path.join(output_dir, custom_name)
+              print(f"Moving {pdf_path} -> {target_path}")
+              shutil.move(pdf_path, target_path)
+
+      # Step 4: Push all raw PDFs to the permanent Archive Release
       - name: Upload All to Permanent Release Archive
         uses: softprops/action-gh-release@v2
         with:
@@ -64,11 +73,11 @@ jobs:
           prerelease: false
           files: final_pdfs/*.pdf
         env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 6: Print the download dashboard link
+      # Step 5: Print the download dashboard link
       - name: Generate Direct Download Link
         run: |
-          echo "### 📄 All PDFs Uploaded to Archive!" >> \$GITHUB_STEP_SUMMARY
-          echo "Every \`.tex\` file in your repository has been compiled and saved." >> \$GITHUB_STEP_SUMMARY
-          echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com{{ github.repository }}/releases/tag/pdf-archive)**" >> \$GITHUB_STEP_SUMMARY
+          echo "### 📄 All PDFs Uploaded to Archive!" >> $GITHUB_STEP_SUMMARY
+          echo "Every \`.tex\` file in your repository has been compiled and saved." >> $GITHUB_STEP_SUMMARY
+          echo "👉 **[View All Raw PDF Builds (Including Older Versions)](https://github.com/${{ github.repository }}/releases/tag/pdf-archive)**" >> $GITHUB_STEP_SUMMARY
