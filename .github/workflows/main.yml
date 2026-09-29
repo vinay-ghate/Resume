@@ -26,16 +26,18 @@ jobs:
           # Create a temporary output directory to hold all generated PDFs
           mkdir -p final_pdfs
           
-          # Find all .tex files across the repository
+          # Find all .tex files across the repository and loop through them
           find . -name "*.tex" -type f | while read -r LATEST_TEX; do
             # Strip leading './'
-            LATEST_TEX=\${LATEST_TEX#./}
+            LATEST_TEX="\${LATEST_TEX#./}"
             
             # Extract basic file name without extension
             FILE_NAME=(basename "LATEST_TEX" .tex)
             
             # Extract parent folder name
-            FOLDER_NAME=\$(basename "(dirname "LATEST_TEX")")
+            DIR_NAME=(dirname "LATEST_TEX")
+            FOLDER_NAME=(basename "DIR_NAME")
+            
             if [ "\$FOLDER_NAME" = "." ] || [ "\(FOLDER_NAME" = "" ] \vert{}\vert{} [ "\)FOLDER_NAME" = "/" ]; then
               FOLDER_NAME="root"
             fi
