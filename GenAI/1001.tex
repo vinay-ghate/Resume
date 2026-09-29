@@ -1,0 +1,176 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[margin=0.4in]{geometry}
+
+%----------FONT OPTIONS----------
+\usepackage[default]{sourcesanspro}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{} 
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-8pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-1pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in]} 
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-3pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%----------HEADER-----------------
+\begin{center}
+    \textbf{\Huge \scshape Vinay Ghate} \\ \vspace{4pt}
+    \small \href{mailto:ghatevinay2@gmail.com}{\underline{ghatevinay2@gmail.com}} $|$ 
+    \href{https://linkedin.com/in/vinay-ghate}{\underline{linkedin.com/in/vinay-ghate}} $|$ 
+    \href{https://v1nay.is-a.dev}{\underline{v1nay.is-a.dev}} $|$ 
+    +91-8605078054 $|$ 
+    Pune, India
+\end{center}
+
+%-----------SUMMARY-----------------
+\section{Summary}
+\small{
+Agentic AI Developer and Backend Engineer specializing in designing and deploying scalable, multi-agent LLM applications. Experienced in cloud-native deployment (Docker/Kubernetes), establishing applying fine-tuning techniques (LoRA/PEFT), and implementing robust Responsible AI guardrails.
+}
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Zeal College of Engineering, Pune University}{Pune, India}
+      {B.E. in Computer Engineering + Honors in Cyber Security (CGPA: 8.41)}{2024}
+      \vspace{1pt}
+      \small{\item{
+       \textbf{Coursework}{: Database Management Systems, Operating Systems, Software Engineering, Cyber Security}
+      }}
+  \resumeSubHeadingListEnd
+
+%-----------EXPERIENCE-----------------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Tata Consultancy Services}{Nov 2024 -- Present}
+      {System Engineer C1 (AI \& Backend)}{Pune, India}
+      \resumeItemListStart
+        \resumeItem{Backend \& Data Infrastructure}
+          {Developing highly critical Python-based microservices designed to handle large-scale structured and unstructured data, serving as the foundation for enterprise AI workflows.}
+        \resumeItem{Security \& Responsible AI}
+          {Contributing to the implementation of application-level security, focusing on secure communication and preparing infrastructure for Responsible AI compliance and prompt injection safeguards.}
+        \resumeItem{System Monitoring}
+          {Monitoring system performance and continuous delivery pipelines using Prometheus and Grafana to ensure low-latency responses for backend services.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Scrobits Technologies}{Jun 2024 -- Nov 2024}
+      {Python Backend Engineering Intern}{Mumbai, India}
+      \resumeItemListStart
+        \resumeItem{Python \& LLM Integration}
+          {Developed scalable backend services using Python frameworks (FastAPI) and integrated initial LLM capabilities using LangChain to automate text processing workflows.}
+        \resumeItem{RAG Pipeline Support}
+          {Built RESTful APIs and utilized MongoDB to manage unstructured domain-specific data, supporting the backend architecture for Retrieval-Augmented Generation (RAG) processes.}
+        \resumeItem{Continuous Delivery}
+          {Packaged applications using Docker, ensuring consistent deployment environments and facilitating seamless continuous delivery for AI-driven prototypes.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+  
+%-----------PROJECTS-----------------
+\section{Projects}
+  \resumeSubHeadingListStart
+
+    \resumeProjectHeading
+      {\textbf{TalkWithDB -- Agentic NL2SQL Engine} $|$ \emph{Python, LangGraph, CrewAI, LLMs}}{2025}
+      \resumeItemListStart
+        \item\small{Developed an autonomous multi-agent application using \textbf{LangGraph} and \textbf{CrewAI} to execute complex database queries via natural language.}
+        \item\small{Implemented \textbf{Agent-to-Agent communication} patterns and utilized anti-hallucination tools to ensure accurate responses and prevent gibberish outputs.}
+      \resumeItemListEnd
+
+    \resumeProjectHeading
+      {\textbf{Chikistalaya -- AI Healthcare Platform} $|$ \emph{Python, LlamaIndex, SLMs, Modular RAG}}{2025}
+      \resumeItemListStart
+        \item\small{Engineered a healthcare backend featuring a \textbf{Modular RAG} architecture (LlamaIndex) to securely synthesize patient data and medical documents.}
+        \item\small{Fine-tuned a domain-specific \textbf{Small Language Model (SLM)} using \textbf{PEFT/LoRA} and implemented Pyrit-inspired prompt injection defenses.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+%-----------SKILLS-----------------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Agentic \& LLM Frameworks}{: LangGraph, CrewAI, Autogen, LangChain, LlamaIndex} \\
+     \textbf{AI \& ML Techniques}{: Modular RAG, RLHF, Fine-Tuning (PEFT, LoRA, QLoRA), Multi-Modal LLMs, SLMs} \\
+     \textbf{LLMOps \& Security}{: Responsible AI, Pyrit, HAX Toolkit, Bleu, Prompt Injection Fallbacks} \\
+     \textbf{Cloud \& Infrastructure}{: Azure, AWS, GCP APIs, Kubernetes, Docker, CI/CD} \\
+     \textbf{Languages \& Data}{: Python, MongoDB, PostgreSQL, Large-Scale Unstructured Data Handling}
+    }}
+ \end{itemize}
+
+%-----------CERTIFICATIONS-----------------
+\section{Certifications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbullet{ Microsoft Certified: Azure AI Fundamentals} \\
+     \textbullet{ Data Streaming Engineer -- Confluent} \\
+     \textbullet{ OCI Certified AI Foundations Associate} \\
+     \textbullet{ OCI Certified Foundations Associate}
+    }}
+ \end{itemize}
+
+%-----------ACTIVITIES-----------------
+\section{Activities \& Achievements}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbullet{ Co-founded and managed student communities -  IODump and GDSC ZCOER.} \\
+     \textbullet{ Selected for Amazon ML Summer School. }
+    }}
+ \end{itemize}
+
+\end{document}
