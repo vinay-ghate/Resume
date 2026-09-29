@@ -36,19 +36,24 @@ jobs:
           output_dir = "final_pdfs"
           os.makedirs(output_dir, exist_ok=True)
 
-          pdf_files = glob.glob("**/*.pdf", recursive=True)
+          author = os.environ["AUTHOR_PREFIX"]
+          run_num = int(os.environ["RUN_NUMBER"])
 
-          for pdf_path in pdf_files:
-              if pdf_path.startswith(output_dir):
+          # The LaTeX action dumps compiled PDFs in the root directory.
+          # We search for the original .tex files to find their folder names.
+          tex_files = glob.glob("**/*.tex", recursive=True)
+
+          for tex_path in tex_files:
+              dir_name = os.path.dirname(tex_path)
+              file_base = os.path.splitext(os.path.basename(tex_path))[0]
+              
+              # The compiled PDF will be sitting at the root level
+              pdf_path = f"{file_base}.pdf"
+              
+              if not os.path.exists(pdf_path):
                   continue
 
-              dir_name = os.path.dirname(pdf_path)
-              file_base = os.path.splitext(os.path.basename(pdf_path))[0]
-
-              author = os.environ["AUTHOR_PREFIX"]
-              run_num = int(os.environ["RUN_NUMBER"])
-
-              # If in a subfolder, include folder name. If in base directory, omit it.
+              # If the original .tex was in a subfolder, grab that folder's name
               if dir_name and dir_name != ".":
                   folder_name = os.path.basename(dir_name)
                   custom_name = f"{author}-{folder_name}-{file_base}-v{run_num:02d}.pdf"
@@ -56,7 +61,7 @@ jobs:
                   custom_name = f"{author}-{file_base}-v{run_num:02d}.pdf"
 
               target_path = os.path.join(output_dir, custom_name)
-              print(f"Moving {pdf_path} -> {target_path}")
+              print(f"Moving {pdf_path} (originally in {dir_name}) -> {target_path}")
               shutil.move(pdf_path, target_path)
 
       # Step 4: Push all raw PDFs to the permanent Archive Release
