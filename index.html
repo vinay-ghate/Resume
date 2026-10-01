@@ -1,75 +1,1874 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Archive Dashboard</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f6f8fa; margin: 0; padding: 40px 20px; color: #24292f; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eaecef; padding-bottom: 10px; }
-        .pdf-list { list-style: none; padding: 0; }
-        .pdf-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #d0d7de; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; }
-        .pdf-item:hover { background-color: #f3f4f6; }
-        .pdf-name { font-weight: 600; font-size: 16px; word-break: break-all; }
-        .download-btn { background-color: #2da44e; color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 14px; transition: 0.2s; white-space: nowrap; margin-left: 15px; }
-        .download-btn:hover { background-color: #2c974b; }
-        .loading { text-align: center; color: #57606a; font-style: italic; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Resume Build History | LaTeX CI/CD Archive</title>
+  <!-- Self-contained SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M9 7h9l5 5v13a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z' fill='%23ffffff'/%3E%3Cpath d='M18 7v5h5' fill='%23bfdbfe'/%3E%3Cpath d='M12 16h8M12 19h8M12 22h5' stroke='%232563eb' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script>
+    // Initialize theme immediately to prevent visual flash
+    (function() {
+      try {
+        const savedTheme = localStorage.getItem('resume_build_theme');
+        const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        // Fallback to light
+      }
+    })();
+  </script>
+  <style>
+    /* CSS Variables & Theming */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, -apple-system, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-surface-hover: #e2e8f0;
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-faint: #94a3b8;
+
+      /* Single Accent Colour (Professional Royal Blue) */
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-subtle: #eff6ff;
+      --accent-border: #bfdbfe;
+      --accent-text: #ffffff;
+
+      --success-dot: #16a34a;
+      --success-bg: #ecfdf5;
+
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --warning-text: #92400e;
+
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #991b1b;
+
+      --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+
+      --transition-fast: 0.15s ease;
+      --transition-base: 0.2s ease;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #0b0f17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1e293b;
+      --bg-surface-hover: #334155;
+
+      --border-subtle: #1e293b;
+      --border-strong: #334155;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-subtle: rgba(59, 130, 246, 0.15);
+      --accent-border: rgba(59, 130, 246, 0.35);
+      --accent-text: #ffffff;
+
+      --success-dot: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.12);
+
+      --warning-bg: rgba(245, 158, 11, 0.12);
+      --warning-border: rgba(245, 158, 11, 0.3);
+      --warning-text: #fcd34d;
+
+      --error-bg: rgba(239, 68, 68, 0.12);
+      --error-border: rgba(239, 68, 68, 0.3);
+      --error-text: #fca5a5;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Base Reset & Typography */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color var(--transition-base), color var(--transition-base);
+    }
+
+    /* Accessibility Focus Visible */
+    *:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+
+    /* App Header */
+    .app-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(8px);
+      transition: background-color var(--transition-base), border-color var(--transition-base);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .brand-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons & Controls */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition-fast);
+      font-family: inherit;
+      line-height: 1.25;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--accent-text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-outline {
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--bg-surface-elevated);
+      border-color: var(--text-muted);
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-main);
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-icon:hover {
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+
+    .btn-icon-action {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-icon-action:hover {
+      background-color: var(--bg-surface-elevated);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+
+    /* Sub-header / Status Strip */
+    .status-strip {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 0;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .status-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .status-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--success-dot);
+      box-shadow: 0 0 0 2px var(--success-bg);
+      display: inline-block;
+    }
+
+    .status-time {
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .status-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spin {
+      animation: spinAnimation 1s linear infinite;
+    }
+
+    @keyframes spinAnimation {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Filter & Search Bar */
+    .toolbar-section {
+      padding: 20px 0 10px;
+    }
+
+    .toolbar-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .toolbar-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 440px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-faint);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 36px 9px 36px;
+      font-size: 0.875rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      font-family: inherit;
+      transition: var(--transition-fast);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-faint);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      background-color: var(--bg-surface);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-faint);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-clear:hover {
+      color: var(--text-main);
+    }
+
+    .track-tabs {
+      display: inline-flex;
+      background-color: var(--bg-surface-elevated);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background-color: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-count {
+      font-size: 0.75rem;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background-color: var(--border-subtle);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .tab-btn.active .tab-count {
+      background-color: var(--accent-subtle);
+      color: var(--accent);
+    }
+
+    /* Notice Banner */
+    .banner {
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .banner-warning {
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+    }
+
+    /* Main Content Tracks & Branches */
+    .main-content {
+      flex: 1;
+      padding: 12px 0 48px;
+    }
+
+    .track-section {
+      margin-bottom: 36px;
+    }
+
+    .track-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .track-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .track-section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .track-count-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background-color: var(--bg-surface-elevated);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .branches-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .branches-grid {
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        align-items: start;
+      }
+    }
+
+    .branch-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Hero Card (Latest Build for each branch) */
+    .hero-card {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-strong);
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .hero-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .hero-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.725rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-latest {
+      background-color: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+    }
+
+    .badge-version {
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .hero-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-icon {
+      color: var(--text-faint);
+      flex-shrink: 0;
+    }
+
+    .meta-text-exact {
+      border-bottom: 1px dotted var(--border-strong);
+      cursor: help;
+    }
+
+    .filename-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background-color: var(--bg-surface-elevated);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      display: inline-block;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .hero-actions .btn {
+      flex: 1;
+    }
+
+    /* Older Builds Timeline */
+    .timeline-container {
+      background-color: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+    }
+
+    .timeline-header {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .timeline-list {
+      list-style: none;
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .timeline-list::before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      bottom: 14px;
+      left: 5px;
+      width: 2px;
+      background-color: var(--border-subtle);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 14px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -18px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--bg-surface);
+      border: 2px solid var(--accent);
+      z-index: 2;
+    }
+
+    .timeline-content {
+      background-color: var(--bg-surface-elevated);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: var(--transition-fast);
+    }
+
+    .timeline-content:hover {
+      border-color: var(--border-strong);
+      background-color: var(--bg-surface);
+    }
+
+    .timeline-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .timeline-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timeline-meta-row {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-time {
+      border-bottom: 1px dotted var(--border-strong);
+      cursor: help;
+    }
+
+    .relative-delta-badge {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-faint);
+    }
+
+    .timeline-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .expander-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent);
+      background-color: var(--accent-subtle);
+      border: 1px dashed var(--accent-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .expander-btn:hover {
+      background-color: var(--accent);
+      color: var(--accent-text);
+      border-style: solid;
+    }
+
+    .is-collapsed {
+      display: none !important;
+    }
+
+    /* Skeleton Loading State */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-surface-elevated) 25%, var(--bg-surface-hover) 50%, var(--bg-surface-elevated) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      width: 100%;
+    }
+
+    .skeleton-title {
+      height: 24px;
+      width: 60%;
+    }
+
+    .skeleton-btn {
+      height: 38px;
+      flex: 1;
+    }
+
+    /* Error & Empty States */
+    .state-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px 24px;
+      text-align: center;
+      max-width: 560px;
+      margin: 32px auto;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .state-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .state-card.is-error .state-icon {
+      background-color: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid var(--error-border);
+    }
+
+    .state-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .state-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .state-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    /* Footer */
+    .app-footer {
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface);
+      padding: 24px 0;
+      margin-top: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 640px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+
+    .footer-link {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📄 Document Archive</h1>
-    <div id="loading" class="loading">Fetching latest PDFs...</div>
-    <ul id="pdf-list" class="pdf-list"></ul>
-</div>
+  <!-- Screen Reader Announcements -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-<script>
-    // Replace with your actual GitHub username and repository name
-    const repo = "vinay-ghate/resume"; 
-    const apiUrl = `https://api.github.com/repos/${repo}/releases/tags/pdf-archive`;
+  <!-- Header -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand-wrap">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Resume Build History</h1>
+          <p>LaTeX CI/CD Archive</p>
+        </div>
+      </div>
 
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            const list = document.getElementById('pdf-list');
-            document.getElementById('loading').style.display = 'none';
+      <div class="header-actions">
+        <!-- Theme Toggle -->
+        <button id="theme-btn" class="btn-icon" aria-label="Toggle light or dark theme" title="Toggle theme">
+          <svg id="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
 
-            if (!data.assets || data.assets.length === 0) {
-                list.innerHTML = '<li class="loading">No PDFs found in the archive yet.</li>';
-                return;
-            }
+        <!-- Releases Page Fallback -->
+        <a id="gh-link" href="https://github.com/vinay-ghate/resume/releases/tag/pdf-archive" target="_blank" rel="noopener noreferrer" class="btn-icon" aria-label="View releases on GitHub" title="View archive on GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
 
-            // Sort newest files first (optional)
-            const assets = data.assets.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+  <!-- Status / Last Build Bar -->
+  <div class="status-strip">
+    <div class="container status-inner">
+      <div class="status-meta">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span>Last build: <strong id="last-build-text" class="status-time">Loading...</strong></span>
+        <span id="cache-indicator" style="display: none;" class="badge badge-version">Cached</span>
+      </div>
+      <div class="status-controls">
+        <button id="refresh-btn" class="btn btn-sm btn-ghost" title="Re-fetch builds from GitHub">
+          <svg id="refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-            assets.forEach(asset => {
-                if (asset.name.endsWith('.pdf')) {
-                    const li = document.createElement('li');
-                    li.className = 'pdf-item';
-                    
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'pdf-name';
-                    nameSpan.textContent = asset.name;
+  <!-- Search & Track Toolbar -->
+  <section class="toolbar-section">
+    <div class="container toolbar-inner">
+      <!-- Search Input -->
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="search" id="search-input" class="search-input" placeholder="Search builds (e.g. 1001, 1005, v24, GenAI)..." aria-label="Search resume builds">
+        <button id="search-clear" class="search-clear" aria-label="Clear search query" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
-                    const btn = document.createElement('a');
-                    btn.className = 'download-btn';
-                    btn.href = asset.browser_download_url;
-                    btn.textContent = 'Download';
-                    btn.target = '_blank';
+      <!-- Track Tabs -->
+      <nav class="track-tabs" role="tablist" aria-label="Resume tracks">
+        <button class="tab-btn active" data-track="all" role="tab" aria-selected="true">
+          All <span class="tab-count" id="count-all">0</span>
+        </button>
+        <button class="tab-btn" data-track="Dev" role="tab" aria-selected="false">
+          Dev <span class="tab-count" id="count-dev">0</span>
+        </button>
+        <button class="tab-btn" data-track="GenAI" role="tab" aria-selected="false">
+          GenAI <span class="tab-count" id="count-genai">0</span>
+        </button>
+        <button class="tab-btn" data-track="Other" role="tab" aria-selected="false">
+          Other <span class="tab-count" id="count-other">0</span>
+        </button>
+      </nav>
+    </div>
+  </section>
 
-                    li.appendChild(nameSpan);
-                    li.appendChild(btn);
-                    list.appendChild(li);
-                }
-            });
-        })
-        .catch(error => {
-            document.getElementById('loading').innerHTML = 'Error loading PDFs. Please check the repository name in the script.';
-            console.error('Error fetching release:', error);
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Stale Cache Banner (shown if network fails but cache exists) -->
+      <div id="cache-notice" class="banner banner-warning" style="display: none;">
+        <div>
+          <strong>GitHub API rate limit reached.</strong>
+          <span id="cache-notice-time">Displaying cached build history.</span>
+        </div>
+        <button id="banner-retry-btn" class="btn btn-sm btn-outline">Retry</button>
+      </div>
+
+      <!-- Container for Dynamic Views (Skeleton / Content / Empty / Error) -->
+      <div id="view-container"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="container footer-inner">
+      <span>LaTeX Build Automation Pipeline</span>
+      <span>
+        Direct release archive on 
+        <a href="https://github.com/vinay-ghate/resume/releases/tag/pdf-archive" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // --- CONFIGURATION & CONSTANTS ---
+      const REPO = 'vinay-ghate/resume';
+      const API_URL = `https://api.github.com/repos/${REPO}/releases/tags/pdf-archive`;
+      const RELEASES_PAGE_URL = `https://github.com/${REPO}/releases/tag/pdf-archive`;
+      const CACHE_KEY = 'resume_pdf_archive_cache';
+      const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
+      const THEME_KEY = 'resume_build_theme';
+
+      // --- STATE ---
+      let rawAssets = [];
+      let parsedAssets = [];
+      let currentTrack = 'all';
+      let currentQuery = '';
+      let isCachedData = false;
+      let cachedTimestamp = null;
+
+      // --- DOM REFERENCES ---
+      const viewContainer = document.getElementById('view-container');
+      const lastBuildText = document.getElementById('last-build-text');
+      const cacheIndicator = document.getElementById('cache-indicator');
+      const refreshBtn = document.getElementById('refresh-btn');
+      const refreshIcon = document.getElementById('refresh-icon');
+      const searchInput = document.getElementById('search-input');
+      const searchClear = document.getElementById('search-clear');
+      const trackTabs = document.querySelectorAll('.tab-btn');
+      const countAll = document.getElementById('count-all');
+      const countDev = document.getElementById('count-dev');
+      const countGenAI = document.getElementById('count-genai');
+      const countOther = document.getElementById('count-other');
+      const cacheNotice = document.getElementById('cache-notice');
+      const cacheNoticeTime = document.getElementById('cache-notice-time');
+      const bannerRetryBtn = document.getElementById('banner-retry-btn');
+      const themeBtn = document.getElementById('theme-btn');
+      const themeIconSun = document.getElementById('theme-icon-sun');
+      const themeIconMoon = document.getElementById('theme-icon-moon');
+      const srAnnouncer = document.getElementById('sr-announcer');
+
+      // --- UTILITIES ---
+
+      function announce(message) {
+        if (srAnnouncer) {
+          srAnnouncer.textContent = message;
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (!bytes || bytes <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return `${(bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0)} ${units[i]}`;
+      }
+
+      function formatRelativeTime(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSec = Math.round(diffMs / 1000);
+        if (diffSec < 60) return 'just now';
+        const diffMin = Math.round(diffSec / 60);
+        if (diffMin < 60) return `${diffMin}m ago`;
+        const diffHours = Math.round(diffMin / 60);
+        if (diffHours < 24) return `${diffHours}h ago`;
+        const diffDays = Math.round(diffHours / 24);
+        if (diffDays < 30) return `${diffDays}d ago`;
+        const diffMonths = Math.round(diffDays / 30);
+        if (diffMonths < 12) return `${diffMonths}mo ago`;
+        return `${Math.round(diffDays / 365)}y ago`;
+      }
+
+      function formatExactDate(date) {
+        return date.toLocaleString(undefined, {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZoneName: 'short'
         });
-</script>
+      }
 
+      // Calculate time delta between two dates in human terms
+      function formatDeltaBetween(newerDate, olderDate) {
+        const diffMs = newerDate - olderDate;
+        if (diffMs <= 0) return 'same time';
+        const diffMin = Math.round(diffMs / (1000 * 60));
+        if (diffMin < 60) return `${diffMin}m earlier`;
+        const diffHours = Math.round(diffMin / 60);
+        if (diffHours < 24) return `${diffHours}h earlier`;
+        const diffDays = Math.round(diffHours / 24);
+        return `${diffDays}d earlier`;
+      }
+
+      // Generate in-browser preview URL using online document viewer
+      function getPreviewUrl(downloadUrl) {
+        return `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}`;
+      }
+
+      // --- FILENAME PARSING & BRANCH DETECTION ---
+
+      function parseAsset(asset) {
+        const filename = asset.name;
+        const base = filename.replace(/\.pdf$/i, '');
+
+        // Determine Track (Dev / GenAI / Other)
+        let track = 'Other';
+        if (/(^|[-_])dev([-_]|$)/i.test(base)) {
+          track = 'Dev';
+        } else if (/(^|[-_])genai([-_]|$)/i.test(base)) {
+          track = 'GenAI';
+        }
+
+        // Strip personal / author prefix (e.g. "Vinay-Ghate-") to keep page clean & free of personal data
+        let stripped = base.replace(/^[A-Za-z]+-[A-Za-z]+-/, '');
+
+        // Extract run or build version (e.g. v24, build12, v1001)
+        let version = '';
+        let versionNum = 0;
+        const vMatch = stripped.match(/[-_](v\d+|build\d+)$/i);
+        let branchPart = stripped;
+        if (vMatch) {
+          version = vMatch[1];
+          const numMatch = version.match(/\d+/);
+          if (numMatch) versionNum = parseInt(numMatch[0], 10);
+          branchPart = stripped.slice(0, vMatch.index);
+        }
+
+        // Normalize branch/variant: e.g. GenAI-v1001 -> GenAI-1001, v1001 -> 1001
+        let normalizedBranch = branchPart.replace(/([-_])v(\d+)/i, '$1$2');
+        if (/^v\d+$/i.test(normalizedBranch)) {
+          normalizedBranch = normalizedBranch.slice(1);
+        }
+
+        // Clean parts into a readable title (e.g. "GenAI • 1001", "GenAI • 1005", "Dev • 2001")
+        const parts = normalizedBranch.split(/[-_]+/).filter(Boolean);
+        const titleParts = parts.map(p => {
+          const lower = p.toLowerCase();
+          if (lower === 'genai') return 'GenAI';
+          if (lower === 'dev') return 'Dev';
+          return p.charAt(0).toUpperCase() + p.slice(1);
+        });
+
+        let cleanTitle = titleParts.join(' • ');
+        if (!cleanTitle) cleanTitle = track;
+
+        // Build date
+        const dateObj = new Date(asset.updated_at || asset.created_at || Date.now());
+        const previewUrl = getPreviewUrl(asset.browser_download_url);
+
+        return {
+          id: asset.id,
+          rawName: filename,
+          cleanTitle,
+          track,
+          branchKey: `${track}:${normalizedBranch.toLowerCase()}`,
+          version,
+          versionNum,
+          size: asset.size,
+          sizeFormatted: formatFileSize(asset.size),
+          date: dateObj,
+          relativeTime: formatRelativeTime(dateObj),
+          exactTime: formatExactDate(dateObj),
+          downloadUrl: asset.browser_download_url,
+          previewUrl: previewUrl
+        };
+      }
+
+      // --- THEME MANAGEMENT ---
+
+      function updateThemeIcons(theme) {
+        if (theme === 'dark') {
+          themeIconSun.style.display = 'block';
+          themeIconMoon.style.display = 'none';
+          themeBtn.setAttribute('aria-label', 'Switch to light theme');
+        } else {
+          themeIconSun.style.display = 'none';
+          themeIconMoon.style.display = 'block';
+          themeBtn.setAttribute('aria-label', 'Switch to dark theme');
+        }
+      }
+
+      function initTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        updateThemeIcons(currentTheme);
+
+        themeBtn.addEventListener('click', () => {
+          const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          try {
+            localStorage.setItem(THEME_KEY, newTheme);
+          } catch (e) {}
+          updateThemeIcons(newTheme);
+          announce(`Switched to ${newTheme} theme`);
+        });
+
+        // Listen for OS scheme change if user hasn't explicitly set theme
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem(THEME_KEY)) {
+              const newTheme = e.matches ? 'dark' : 'light';
+              document.documentElement.setAttribute('data-theme', newTheme);
+              updateThemeIcons(newTheme);
+            }
+          });
+        }
+      }
+
+      // --- RENDERING SKELETON LOADING ---
+
+      function renderSkeleton() {
+        viewContainer.innerHTML = `
+          <div class="branches-grid" aria-busy="true" aria-label="Loading resume builds">
+            ${[1, 2, 3].map(() => `
+              <div class="branch-column">
+                <div class="skeleton-card">
+                  <div style="display: flex; justify-content: space-between;">
+                    <div class="skeleton skeleton-line" style="width: 90px; height: 22px;"></div>
+                    <div class="skeleton skeleton-line" style="width: 48px; height: 22px;"></div>
+                  </div>
+                  <div class="skeleton skeleton-title"></div>
+                  <div class="skeleton skeleton-line" style="width: 75%;"></div>
+                  <div class="skeleton skeleton-line" style="width: 50%;"></div>
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <div class="skeleton skeleton-btn"></div>
+                    <div class="skeleton skeleton-btn"></div>
+                  </div>
+                </div>
+                <div class="skeleton skeleton-line" style="height: 60px; margin-top: 4px;"></div>
+                <div class="skeleton skeleton-line" style="height: 60px;"></div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // --- RENDERING ERROR & EMPTY STATES ---
+
+      function renderError(message, canRetry = true) {
+        viewContainer.innerHTML = `
+          <div class="state-card is-error" role="alert">
+            <div class="state-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h2 class="state-title">Unable to Load Builds</h2>
+            <p class="state-desc">${message || "We couldn't connect to GitHub to fetch the latest compiled resumes. You may have reached GitHub's unauthenticated API rate limit (60 requests/hour)."}</p>
+            <div class="state-actions">
+              ${canRetry ? `<button id="error-retry-btn" class="btn btn-primary">Try Again</button>` : ''}
+              <a href="${RELEASES_PAGE_URL}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+                View Directly on GitHub
+              </a>
+            </div>
+          </div>
+        `;
+
+        const retryBtn = document.getElementById('error-retry-btn');
+        if (retryBtn) {
+          retryBtn.addEventListener('click', () => fetchBuilds(true));
+        }
+      }
+
+      function renderEmpty(searchQuery) {
+        viewContainer.innerHTML = `
+          <div class="state-card">
+            <div class="state-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <h2 class="state-title">No Builds Found</h2>
+            <p class="state-desc">
+              ${searchQuery ? `No resume builds matched the query "<strong>${escapeHtml(searchQuery)}</strong>".` : 'No PDF builds are currently available in the archive tag.'}
+            </p>
+            ${searchQuery ? `
+              <div class="state-actions">
+                <button id="reset-search-btn" class="btn btn-outline">Clear Search</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        const resetBtn = document.getElementById('reset-search-btn');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentQuery = '';
+            searchClear.style.display = 'none';
+            renderApp();
+          });
+        }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // --- RENDERING BUILD CARDS & TIMELINE ---
+
+      function renderApp() {
+        if (!parsedAssets.length) {
+          renderEmpty();
+          return;
+        }
+
+        // Apply Search & Track Filter
+        const query = currentQuery.trim().toLowerCase();
+        let filtered = parsedAssets.filter(item => {
+          // Track filter
+          if (currentTrack !== 'all' && item.track !== currentTrack) {
+            return false;
+          }
+          // Query filter
+          if (query) {
+            const matchesQuery = item.cleanTitle.toLowerCase().includes(query) ||
+                                 item.rawName.toLowerCase().includes(query) ||
+                                 item.track.toLowerCase().includes(query) ||
+                                 (item.version && item.version.toLowerCase().includes(query));
+            if (!matchesQuery) return false;
+          }
+          return true;
+        });
+
+        // Update counts
+        updateCounts();
+
+        if (filtered.length === 0) {
+          renderEmpty(currentQuery);
+          return;
+        }
+
+        // Group by Track, then by Branch
+        const trackOrder = ['Dev', 'GenAI', 'Other'];
+        const trackGroups = {};
+        trackOrder.forEach(t => { trackGroups[t] = {}; });
+
+        filtered.forEach(item => {
+          if (!trackGroups[item.track]) trackGroups[item.track] = {};
+          if (!trackGroups[item.track][item.branchKey]) {
+            trackGroups[item.track][item.branchKey] = [];
+          }
+          trackGroups[item.track][item.branchKey].push(item);
+        });
+
+        // Determine which tracks have matching branches
+        const tracksToDisplay = trackOrder.filter(t => {
+          if (currentTrack !== 'all' && currentTrack !== t) return false;
+          const branches = trackGroups[t];
+          return branches && Object.keys(branches).length > 0;
+        });
+
+        if (tracksToDisplay.length === 0) {
+          renderEmpty(currentQuery);
+          return;
+        }
+
+        // Build HTML for each Track Section
+        const tracksHtml = tracksToDisplay.map(trackName => {
+          const branchesMap = trackGroups[trackName];
+          const branchKeys = Object.keys(branchesMap);
+
+          // Calculate total builds in this track
+          let totalTrackBuilds = 0;
+          branchKeys.forEach(k => { totalTrackBuilds += branchesMap[k].length; });
+
+          // Render each branch column (Hero card + Timeline)
+          const branchColsHtml = branchKeys.map(branchKey => {
+            const items = branchesMap[branchKey];
+            // items are already sorted newest first
+            const latestItem = items[0];
+            const olderItems = items.slice(1);
+            const safeBranchId = branchKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            return `
+              <div class="branch-column" data-branch="${escapeHtml(branchKey)}">
+                <!-- Hero Card: Latest Build of this specific Branch -->
+                <article class="hero-card" aria-label="Latest build for ${escapeHtml(latestItem.cleanTitle)}">
+                  <div class="hero-header">
+                    <div class="hero-badges">
+                      <span class="badge badge-latest">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Latest
+                      </span>
+                      ${latestItem.version ? `<span class="badge badge-version" title="Build version">${escapeHtml(latestItem.version)}</span>` : ''}
+                    </div>
+                  </div>
+
+                  <h3 class="hero-title">${escapeHtml(latestItem.cleanTitle)}</h3>
+
+                  <div class="meta-list">
+                    <div class="meta-row">
+                      <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span>Built <span class="meta-text-exact" title="Exact timestamp: ${latestItem.exactTime}">${latestItem.relativeTime}</span></span>
+                    </div>
+                    <div class="meta-row">
+                      <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      </svg>
+                      <span>${latestItem.sizeFormatted}</span>
+                    </div>
+                    <div class="meta-row" style="margin-top: 2px;">
+                      <span class="filename-tag" title="Artifact filename: ${escapeHtml(latestItem.rawName)}">${escapeHtml(latestItem.rawName)}</span>
+                    </div>
+                  </div>
+
+                  <!-- Hero Actions: Download (direct file) & Preview (view in browser) -->
+                  <div class="hero-actions">
+                    <a href="${latestItem.downloadUrl}" class="btn btn-primary" download="${escapeHtml(latestItem.rawName)}" title="Download PDF file">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      <span>Download</span>
+                    </a>
+                    <a href="${latestItem.previewUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline" title="Preview PDF in browser tab">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <span>Preview</span>
+                    </a>
+                  </div>
+                </article>
+
+                <!-- Older Builds Timeline for this Branch -->
+                ${olderItems.length > 0 ? `
+                  <div class="timeline-container">
+                    <div class="timeline-header">
+                      <span>Older Builds</span>
+                      <span>${olderItems.length} older</span>
+                    </div>
+
+                    <ul class="timeline-list">
+                      ${olderItems.map((item, index) => {
+                        const isExtra = index >= 5;
+                        const timeDelta = formatDeltaBetween(latestItem.date, item.date);
+
+                        return `
+                          <li class="timeline-item ${isExtra ? 'is-collapsed extra-branch-' + safeBranchId : ''}">
+                            <div class="timeline-dot" aria-hidden="true"></div>
+                            <div class="timeline-content">
+                              <div class="timeline-info">
+                                <div class="timeline-title-row">
+                                  <span class="timeline-title" title="${escapeHtml(item.rawName)}">${escapeHtml(item.cleanTitle)}</span>
+                                  ${item.version ? `<span class="badge badge-version">${escapeHtml(item.version)}</span>` : ''}
+                                  ${timeDelta !== 'same time' ? `<span class="relative-delta-badge" title="Compiled ${timeDelta} than branch latest">${timeDelta}</span>` : ''}
+                                </div>
+                                <div class="timeline-meta-row">
+                                  <span class="timeline-time" title="Exact: ${item.exactTime}">${item.relativeTime}</span>
+                                  <span>&bull;</span>
+                                  <span>${item.sizeFormatted}</span>
+                                </div>
+                              </div>
+                              <div class="timeline-actions">
+                                <a href="${item.downloadUrl}" class="btn-icon-action" download="${escapeHtml(item.rawName)}" aria-label="Download ${escapeHtml(item.cleanTitle)} ${item.version}" title="Download PDF">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                  </svg>
+                                </a>
+                                <a href="${item.previewUrl}" target="_blank" rel="noopener noreferrer" class="btn-icon-action" aria-label="Preview ${escapeHtml(item.cleanTitle)} ${item.version}" title="Preview PDF in browser tab">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                  </svg>
+                                </a>
+                              </div>
+                            </div>
+                          </li>
+                        `;
+                      }).join('')}
+                    </ul>
+
+                    ${olderItems.length > 5 ? `
+                      <button class="expander-btn" data-expander-branch="${safeBranchId}" aria-expanded="false">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        <span>Show ${olderItems.length - 5} older builds</span>
+                      </button>
+                    ` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <section class="track-section" data-track="${trackName}" aria-labelledby="track-heading-${trackName}">
+              <div class="track-section-header">
+                <h2 id="track-heading-${trackName}" class="track-section-title">
+                  <span>${trackName} Track</span>
+                </h2>
+                <span class="track-count-badge">${totalTrackBuilds} ${totalTrackBuilds === 1 ? 'build' : 'builds'}</span>
+              </div>
+              <div class="branches-grid">
+                ${branchColsHtml}
+              </div>
+            </section>
+          `;
+        }).join('');
+
+        viewContainer.innerHTML = tracksHtml;
+
+        // Attach expander toggle events
+        bindExpanderActions();
+      }
+
+      function bindExpanderActions() {
+        const expanderBtns = viewContainer.querySelectorAll('[data-expander-branch]');
+        expanderBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const branchId = btn.getAttribute('data-expander-branch');
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            const extraItems = viewContainer.querySelectorAll(`.extra-branch-${branchId}`);
+
+            if (isExpanded) {
+              extraItems.forEach(item => item.classList.add('is-collapsed'));
+              btn.setAttribute('aria-expanded', 'false');
+              btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <span>Show ${extraItems.length} older builds</span>
+              `;
+              announce('Collapsed older builds');
+            } else {
+              extraItems.forEach(item => item.classList.remove('is-collapsed'));
+              btn.setAttribute('aria-expanded', 'true');
+              btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <span>Show fewer builds</span>
+              `;
+              announce('Expanded older builds');
+            }
+          });
+        });
+      }
+
+      function updateCounts() {
+        const allCount = parsedAssets.length;
+        const devCount = parsedAssets.filter(a => a.track === 'Dev').length;
+        const genAiCount = parsedAssets.filter(a => a.track === 'GenAI').length;
+        const otherCount = parsedAssets.filter(a => a.track === 'Other').length;
+
+        countAll.textContent = allCount;
+        countDev.textContent = devCount;
+        countGenAI.textContent = genAiCount;
+        countOther.textContent = otherCount;
+      }
+
+      function updateLastBuildHeader() {
+        if (!parsedAssets.length) {
+          lastBuildText.textContent = 'None';
+          return;
+        }
+
+        // Global latest build (first element of sorted parsedAssets)
+        const latest = parsedAssets[0];
+        lastBuildText.textContent = latest.relativeTime;
+        lastBuildText.title = `Latest build: ${latest.exactTime} (${latest.cleanTitle})`;
+      }
+
+      // --- DATA FETCHING & LOCALSTORAGE CACHING ---
+
+      async function fetchBuilds(forceRefresh = false) {
+        // Set refresh spinner
+        refreshIcon.classList.add('spin');
+        refreshBtn.disabled = true;
+
+        // Check local cache if not forcing refresh
+        if (!forceRefresh) {
+          try {
+            const cachedRaw = localStorage.getItem(CACHE_KEY);
+            if (cachedRaw) {
+              const cached = JSON.parse(cachedRaw);
+              const now = Date.now();
+              if (cached.timestamp && (now - cached.timestamp < CACHE_TTL_MS) && cached.data) {
+                processAndRender(cached.data, true, cached.timestamp);
+                refreshIcon.classList.remove('spin');
+                refreshBtn.disabled = false;
+                return;
+              }
+            }
+          } catch (e) {
+            // Invalid cache, continue to fetch
+          }
+        }
+
+        renderSkeleton();
+
+        try {
+          const response = await fetch(API_URL);
+
+          if (!response.ok) {
+            throw new Error(`GitHub API returned status ${response.status}`);
+          }
+
+          const data = await response.json();
+          const assets = data.assets || [];
+
+          // Save to LocalStorage cache
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+              timestamp: Date.now(),
+              data: assets
+            }));
+          } catch (storageErr) {
+            console.warn('LocalStorage save failed:', storageErr);
+          }
+
+          cacheNotice.style.display = 'none';
+          processAndRender(assets, false, Date.now());
+          announce('Loaded latest resume builds from GitHub');
+        } catch (err) {
+          console.error('Fetch error:', err);
+
+          // Graceful fallback to cached data if network or rate limit failed
+          let fallbackSuccess = false;
+          try {
+            const cachedRaw = localStorage.getItem(CACHE_KEY);
+            if (cachedRaw) {
+              const cached = JSON.parse(cachedRaw);
+              if (cached && cached.data && cached.data.length > 0) {
+                processAndRender(cached.data, true, cached.timestamp);
+                fallbackSuccess = true;
+                cacheNotice.style.display = 'flex';
+                const cacheDate = new Date(cached.timestamp);
+                cacheNoticeTime.textContent = `Showing cached data from ${formatExactDate(cacheDate)} due to network / API rate limit.`;
+                announce('Loaded cached build history');
+              }
+            }
+          } catch (fallbackErr) {
+            console.warn('Cache fallback failed:', fallbackErr);
+          }
+
+          if (!fallbackSuccess) {
+            renderError("Unable to fetch builds from GitHub. GitHub unauthenticated API rate limits (60/hour) or network restrictions may apply.");
+          }
+        } finally {
+          refreshIcon.classList.remove('spin');
+          refreshBtn.disabled = false;
+        }
+      }
+
+      function processAndRender(assets, fromCache, timestamp) {
+        rawAssets = assets;
+        isCachedData = fromCache;
+        cachedTimestamp = timestamp;
+
+        // Filter only .pdf assets
+        const pdfAssets = assets.filter(a => a.name && a.name.toLowerCase().endsWith('.pdf'));
+
+        // Sort descending: strictly newest build first
+        pdfAssets.sort((a, b) => {
+          const timeA = new Date(a.updated_at || a.created_at).getTime();
+          const timeB = new Date(b.updated_at || b.created_at).getTime();
+          if (timeB !== timeA) return timeB - timeA;
+
+          // Tie-break by version number if available (e.g. v24 > v23)
+          const matchA = a.name.match(/v(\d+)/i);
+          const matchB = b.name.match(/v(\d+)/i);
+          const numA = matchA ? parseInt(matchA[1], 10) : 0;
+          const numB = matchB ? parseInt(matchB[1], 10) : 0;
+          return numB - numA;
+        });
+
+        parsedAssets = pdfAssets.map(parseAsset);
+
+        // Update header & cache badges
+        if (fromCache) {
+          cacheIndicator.style.display = 'inline-flex';
+          const cacheDate = new Date(timestamp);
+          cacheIndicator.title = `Cached on ${formatExactDate(cacheDate)}`;
+        } else {
+          cacheIndicator.style.display = 'none';
+        }
+
+        updateLastBuildHeader();
+        renderApp();
+      }
+
+      // --- EVENT HANDLERS ---
+
+      function initEventListeners() {
+        // Refresh button
+        refreshBtn.addEventListener('click', () => {
+          fetchBuilds(true);
+        });
+
+        // Banner retry button
+        bannerRetryBtn.addEventListener('click', () => {
+          fetchBuilds(true);
+        });
+
+        // Search Input
+        searchInput.addEventListener('input', (e) => {
+          currentQuery = e.target.value;
+          if (currentQuery.length > 0) {
+            searchClear.style.display = 'flex';
+          } else {
+            searchClear.style.display = 'none';
+          }
+          renderApp();
+        });
+
+        // Search Clear
+        searchClear.addEventListener('click', () => {
+          searchInput.value = '';
+          currentQuery = '';
+          searchClear.style.display = 'none';
+          searchInput.focus();
+          renderApp();
+        });
+
+        // Track Tabs Filter
+        trackTabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            trackTabs.forEach(t => {
+              t.classList.remove('active');
+              t.setAttribute('aria-selected', 'false');
+            });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            currentTrack = tab.getAttribute('data-track');
+            renderApp();
+            announce(`Filtered by ${currentTrack} track`);
+          });
+        });
+
+        // Keyboard Shortcut: '/' to search, 'r' to refresh
+        window.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          if (e.key === '/') {
+            e.preventDefault();
+            searchInput.focus();
+          } else if (e.key === 'r' || e.key === 'R') {
+            e.preventDefault();
+            fetchBuilds(true);
+          }
+        });
+      }
+
+      // --- INITIALIZE APPLICATION ---
+      initTheme();
+      initEventListeners();
+      fetchBuilds(false);
+
+    })();
+  </script>
 </body>
 </html>
