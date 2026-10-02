@@ -1,0 +1,179 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[margin=0.4in]{geometry}
+
+\usepackage[default]{sourcesanspro}
+\usepackage[T1]{fontenc}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}
+  {\vspace{-8pt}\scshape\raggedright\large}
+  {}
+  {0em}
+  {}
+  [\color{black}\titlerule \vspace{-5pt}]
+
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-1pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+  \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small#3} & \textit{\small #4} \\
+  \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+    \small#1 & #2 \\
+  \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-3pt}}
+
+% ---------------------------------------------------------------
+% DUMMY VALUES are shown in RED via \dv{...}. Replace each with your real
+% value (or delete the claim). When done, change the line below to:
+%   \newcommand{\dv}[1]{#1}
+% ---------------------------------------------------------------
+\newcommand{\dv}[1]{#1}
+
+\newcommand{\fullName}{Vinay Ghate}
+\newcommand{\emailAddr}{ghatevinay2@gmail.com}
+\newcommand{\linkedinUrl}{https://linkedin.com/in/vinay-ghate}
+\newcommand{\portfolioUrl}{https://v1nay.is-a.dev}
+\newcommand{\phoneNumber}{+91-8605078054}
+\newcommand{\cityCountry}{Pune, India}
+
+\begin{document}
+
+%----------HEADER-----------------
+\begin{center}
+    \textbf{\Huge \scshape Vinay Ghate} \\ \vspace{4pt}
+    \small \href{mailto:\emailAddr}{\underline{\emailAddr}} $|$
+    \href{\linkedinUrl}{\underline{linkedin.com/in/vinay-ghate}} $|$
+    \href{\portfolioUrl}{\underline{v1nay.is-a.dev}} $|$
+    \phoneNumber $|$
+    Pune, India
+\end{center}
+
+%-----------SUMMARY-----------------
+\section{Summary}
+\small{Python backend engineer with ~2 years of experience building event-driven systems on Apache Kafka and Kubernetes. Strong in system design (scalability, caching, messaging, database design), REST API design, PostgreSQL and mTLS-secured services, with working knowledge of Java and hands-on LLM/RAG integration.}
+
+%-----------SKILLS-----------------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Backend}{: Python, FastAPI, Django, Flask, SQLAlchemy, REST APIs, GraphQL, gRPC, Protocol Buffers, asyncio, Event-Driven Architecture, Microservices} \\
+     \textbf{System Design}{: HLD \& LLD, Distributed Systems, Scalability, Fault Tolerance, Caching, Load Balancing, Message Queues, Database Design \& Indexing, Replication \& Sharding, API Design, Rate Limiting, Design Patterns, OOP} \\
+     \textbf{Streaming \& Messaging}{: Apache Kafka (Strimzi), Producers/Consumers, Partitioning, WebSockets} \\
+     \textbf{Databases}{: PostgreSQL, MySQL, MongoDB, SQL, Schema Design} \\
+     \textbf{Cloud \& DevOps}{: Kubernetes, Helm, Docker, Linux (Shell, SSH), GitHub Actions (CI/CD), Prometheus (Monitoring), Git} \\
+     \textbf{Security \& Networking}{: mTLS, SSH, TCP/IP, HTTP/HTTPS, WebSockets, Access Control, Data Governance} \\
+     \textbf{AI Integration}{: LLM APIs, RAG Pipelines, MCP, Prompt Engineering} \\
+     \textbf{Languages}{: Python, SQL, Bash, Java (basic)}
+    }}
+ \end{itemize}
+
+%-----------EXPERIENCE-----------------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Tata Consultancy Services}{Nov 2024 -- Present}
+      {System Engineer C1 (Backend \& Streaming)}{Mumbai, India}
+      \resumeItemListStart
+        \resumeItem{Event Streaming}
+          {Deployed and tuned Strimzi Kafka on Kubernetes with Helm for Ericsson's stream-processing platform handling 1M+ events/sec, covering cluster configuration, partitioning and throughput scaling.}
+        \resumeItem{Caching}
+          {Cut bandwidth usage by 60\%+ by implementing a caching layer for high-volume network events (Ericsson ENM).}
+        \resumeItem{Security \& Reliability}
+          {Implemented mTLS for inter-service communication and resolved production issues by analyzing Linux logs, TCP/IP behavior and runtime stack traces.}
+        \resumeItem{Observability}
+          {Built a Prometheus dashboard for Kafka metrics, reducing time to detect consumer lag by 50\%.}
+        \resumeItem{AI Integration}
+          {Built MCP-based AI agents (Confluence, Jira) and a RAG chat service over team knowledge for 15+ engineers.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Scrobits Technologies}{Jun 2024 -- Nov 2024}
+      {Python Backend Engineering Intern}{Pune, India}
+      \resumeItemListStart
+        \resumeItem{APIs \& Databases}
+          {Developed \dv{10}+ RESTful endpoints with Django and designed SQL and MongoDB schemas for production content pipelines.}
+        \resumeItem{LLM Backend}
+          {Built Python services integrating ChatGPT and Gemini APIs to automate content generation and API publishing.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------------
+\section{Projects}
+  \resumeSubHeadingListStart
+
+    \resumeProjectHeading
+      {\textbf{Nexyn -- Memory Middleware for AI Agents} $|$ \emph{Python, FastAPI, asyncio, PostgreSQL, Cognee}}{\dv{2026} $|$ \href{https://github.com/vinay-ghate}{\underline{\dv{GitHub}}}}
+      \resumeItemListStart
+        \item\small{Designed an async FastAPI and PostgreSQL service with a four-layer pipeline (buffer, evaluator, consolidator, decay) giving agents short-term state and long-term memory.}
+        \item\small{Open-source hackathon project; LLM-scored importance with decay and reinforcement improved recall relevance 25\% in tests.}
+      \resumeItemListEnd
+
+    \resumeProjectHeading
+      {\textbf{WeatherFlow -- Kafka Streaming Pipeline} $|$ \emph{Python, Apache Kafka, WebSockets, Docker Compose}}{\dv{2026} $|$ \href{https://github.com/vinay-ghate}{\underline{\dv{GitHub}}}}
+      \resumeItemListStart
+        \item\small{Built a producer replaying historical weather data into a Kafka topic partitioned by city to preserve per-city ordering, with a consumer streaming updates to a live WebSocket UI.}
+        \item\small{Containerized the full stack with Docker Compose for one-command local setup.}
+      \resumeItemListEnd
+
+    \resumeProjectHeading
+      {\textbf{Chikistalaya -- Management Platform} $|$ \emph{Python, TypeScript, SQL, Docker}}{\dv{2025} $|$ \href{https://github.com/vinay-ghate}{\underline{\dv{GitHub}}}}
+      \resumeItemListStart
+        \item\small{Built backend services and automation APIs with an LLM assistant enforcing strict data isolation, access control and data governance; containerized with Docker.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Zeal College of Engineering, Pune University}{Pune, India}
+      {B.E. in Computer Engineering + Honors in Cyber Security (CGPA: 8.41)}{2024}
+  \resumeSubHeadingListEnd
+
+%-----------CERTIFICATIONS-----------------
+\section{Certifications \& Achievements}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbullet{ Data Streaming Engineer -- Confluent \ $|$ \ Microsoft Certified: Azure AI Fundamentals \ $|$ AWS Certified AI Practitioner} \\
+     \textbullet{ Amazon ML Summer School \ $|$ Co-founded GDSC ZCOER and IODump student communities}
+    }}
+ \end{itemize}
+
+\end{document}
